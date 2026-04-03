@@ -1,6 +1,5 @@
-import { View, Text } from 'react-native'
-import React from 'react'
 import { Link } from 'expo-router'
+import { Text, View } from 'react-native'
 
 const signUp = () => {
   return (
