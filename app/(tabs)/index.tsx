@@ -20,7 +20,7 @@ export default function App() {
       <Link href="/(auth)/sign-up" className="mt-4 rounded bg-primary text-white p-4">
         <Text className="justify-center items-center flex-1">Go to Sign Up</Text>
       </Link>
-      <Link href ="/app/subsscription/spotify">Spotify Subscription</Link>
+      <Link href="/subscriptions/spotify" className="mt-4 rounded bg-primary text-white p-4">Spotify Subscription</Link>
       <Link 
           href={{
             pathname:"/subscriptions/[id]",
