@@ -8,7 +8,7 @@ import { styled } from 'nativewind';
 
 const SafeAreaView = styled(RNSafeAreaView);
 
-const SignIn = () => {
+const  SignIn = () => {
     const { signIn, errors, fetchStatus } = useSignIn();
     const router = useRouter();
 
@@ -53,7 +53,7 @@ const handleSubmit = async () => {
                     $set: { email: emailAddress },
                     $set_once: { first_sign_in_date: new Date().toISOString() },
                 });
-                posthog.capture('user_signed_in', { email: emailAddress });
+               // posthog.capture('user_signed_in', { email: emailAddress });
 
                 const url = decorateUrl('/(tabs)');
                 if (url.startsWith('http')) {
@@ -310,4 +310,4 @@ return (
 );
 };
 
-export default signIn;
+export default SignIn;
