@@ -1,10 +1,17 @@
-import { Stack } from "expo-router";
+import { Stack,SplashScreen } from "expo-router";
 import '@/global.css'
 import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 
-void SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+if (!publishableKey) {
+  throw new Error("Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in .env");
+}
 
 export default function RootLayout() {
 
@@ -25,5 +32,9 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </ClerkProvider>
+  );
 }

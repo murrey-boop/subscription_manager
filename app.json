@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "subscription_manager",
-    "slug": "subscription_manager",
+    "name": "Recurrly",
+    "slug": "recurrly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "subscriptionmanager",
+    "scheme": "recurrly",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
