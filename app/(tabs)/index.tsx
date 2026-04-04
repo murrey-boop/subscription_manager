@@ -4,7 +4,7 @@ import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { styled } from "nativewind";
 import images from "@/constants/images";
-import { HOME_BALANCE, HOME_USER, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
+import { HOME_BALANCE, HOME_USER } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import { formatCurrency } from "@/lib/utils";
 import dayjs from "dayjs";
@@ -46,9 +46,7 @@ export default function App() {
                 daysLeft: Math.max(0, dayjs(sub.renewalDate).diff(now, "day")),
             }));
 
-        return computedUpcoming.length > 0
-            ? computedUpcoming
-            : UPCOMING_SUBSCRIPTIONS;
+        return computedUpcoming;
     }, [subscriptions]);
 
     const handleSubscriptionPress = (item: Subscription) => {

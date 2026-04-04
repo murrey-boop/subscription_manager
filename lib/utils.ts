@@ -12,7 +12,7 @@ export const formatCurrency = (value: number, currency = "KES"): string => {
       maximumFractionDigits: 2,
     }).format(safeValue);
   } catch {
-    return `KSh ${safeValue.toFixed(2)}`;
+    return `${currency} ${safeValue.toFixed(2)}`;
   }
 };
 

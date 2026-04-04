@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { icons } from '@/constants/icons';
 import dayjs from 'dayjs';
 
+const posthog = (globalThis as { posthog?: { capture: (event: string, props?: Record<string, unknown>) => void } }).posthog;
 
 interface CreateSubscriptionModalProps {
   visible: boolean;
@@ -65,7 +66,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
 
     onSubmit(newSubscription);
 
-    posthog.capture('subscription_created', {
+    posthog?.capture('subscription_created', {
       subscription_name: name.trim(),
       subscription_price: priceValue,
       subscription_frequency: frequency,
