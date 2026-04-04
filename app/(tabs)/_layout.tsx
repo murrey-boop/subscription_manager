@@ -34,7 +34,7 @@ const TabLayout = () => {
           borderRadius: tabBar.radius,
           backgroundColor: colors.card,
           borderColor: colors.primary,
-          borderTopWidth: 0,
+          borderWidth: 1,
           elevation: 0,
         },
         tabBarItemStyle: {
