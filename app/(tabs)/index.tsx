@@ -13,11 +13,12 @@ import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { usePostHog } from "posthog-react-native";
 
-const posthog = (globalThis as { posthog?: { capture: (event: string, props?: Record<string, unknown>) => void } }).posthog;
 const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
+    const posthog = usePostHog();
     const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
         string | null
     >(null);
@@ -57,7 +58,7 @@ export default function App() {
             currentId === item.id ? null : item.id,
         );
 
-        posthog?.capture(
+        posthog.capture(
             isExpanding ? "subscription_expanded" : "subscription_collapsed",
             {
                 subscription_name: item.name,
@@ -68,13 +69,6 @@ export default function App() {
 
     const handleCreateSubscription = (newSubscription: Subscription) => {
         addSubscription(newSubscription);
-
-        posthog?.capture("subscription_created", {
-            subscription_name: newSubscription.name,
-            subscription_price: newSubscription.price,
-            subscription_frequency: newSubscription.frequency,
-            subscription_category: newSubscription.category,
-        });
     };
 
   return (

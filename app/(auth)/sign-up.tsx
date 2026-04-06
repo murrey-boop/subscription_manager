@@ -1,5 +1,5 @@
 import { useAuth, useSignUp } from "@clerk/expo";
-import { Link, useRouter, type Href } from "expo-router";
+import { Link } from "expo-router";
 import { styled } from "nativewind";
 import React, { useState } from "react";
 import {
@@ -12,13 +12,14 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const SignUp = () => {
   const { signUp, errors, fetchStatus } = useSignUp();
   const { isSignedIn } = useAuth();
-  const router = useRouter();
+  const posthog = usePostHog();
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -93,19 +94,29 @@ const SignUp = () => {
       console.log('Unverified fields:', signUp.unverifiedFields);
       console.log('Missing fields:', signUp.missingFields);
 
+      // Identify and track sign-up completion
+      posthog.identify(emailAddress, {
+        $set: {
+          email: emailAddress,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+        },
+        $set_once: { sign_up_date: new Date().toISOString() },
+      });
+      posthog.capture('user_signed_up', {
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+      });
+
       // Finalize the sign-up
       console.log('Finalizing sign-up...');
       await signUp.finalize({
-        navigate: ({ session, decorateUrl }) => {
+        navigate: ({ session }) => {
           console.log('Finalize navigate callback - session:', session);
           if (session?.currentTask) {
             console.log('Session has currentTask:', session.currentTask);
             return;
           }
-
-          const destination = "/(tabs)" as Href;
-          console.log('Navigating to:', destination);
-          router.replace(destination);
         },
       });
     } catch (err) {

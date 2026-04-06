@@ -1,16 +1,17 @@
 import { useSignIn } from '@clerk/expo';
-import { Link, useRouter, type Href } from 'expo-router';
+import { Link } from 'expo-router';
 import { styled } from 'nativewind';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView as RNSafeAreaView } from 'react-native-safe-area-context';
+import { usePostHog } from 'posthog-react-native';
 
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const  SignIn = () => {
     const { signIn, errors, fetchStatus } = useSignIn();
-    const router = useRouter();
+    const posthog = usePostHog();
 
     const [emailAddress, setEmailAddress] = useState('');
     const [password, setPassword] = useState('');
@@ -45,18 +46,31 @@ const handleSubmit = async () => {
         console.log('Password auth succeeded. Status:', signIn.status);
 
         if (signIn.status === 'complete') {
+            posthog.identify(emailAddress, {
+                $set: { email: emailAddress },
+                $set_once: { first_sign_in_date: new Date().toISOString() },
+            });
+            posthog.capture('user_signed_in', { method: 'password' });
             await signIn.finalize({
-                navigate: ({ session, decorateUrl }) => {
+                navigate: ({ session }) => {
                     if (session?.currentTask) {
                         console.log(session?.currentTask);
                         return;
                     }
-
-                    router.replace('/(tabs)' as Href);
                 },
             });
         } else if (signIn.status === 'needs_second_factor') {
             console.log('MFA required');
+            const emailCodeFactor = signIn.supportedSecondFactors.find(
+                (factor) => factor.strategy === 'email_code'
+            );
+
+            if (emailCodeFactor) {
+                console.log('Sending MFA email code...');
+                await signIn.mfa.sendEmailCode();
+            } else {
+                setSignInError('No MFA email verification method available');
+            }
         } else if (signIn.status === 'needs_client_trust') {
             console.log('Client trust verification needed');
             const emailCodeFactor = signIn.supportedSecondFactors.find(
@@ -77,6 +91,10 @@ const handleSubmit = async () => {
         const errorMsg = err instanceof Error ? err.message : 'An unexpected error occurred';
         console.error('Sign-in error:', errorMsg);
         setSignInError(errorMsg);
+        posthog.capture('$exception', {
+            $exception_list: [{ type: 'SignInError', value: errorMsg }],
+            $exception_source: 'sign-in',
+        });
     }
 };
 
@@ -90,14 +108,16 @@ const handleVerify = async () => {
         console.log('Sign-in status after verification:', signIn.status);
 
         if (signIn.status === 'complete') {
+            posthog.identify(emailAddress, {
+                $set: { email: emailAddress },
+            });
+            posthog.capture('user_signed_in', { method: 'mfa' });
             await signIn.finalize({
-                navigate: ({ session, decorateUrl }) => {
+                navigate: ({ session }) => {
                     if (session?.currentTask) {
                         console.log(session?.currentTask);
                         return;
                     }
-
-                    router.replace('/(tabs)' as Href);
                 },
             });
         } else {
@@ -111,8 +131,8 @@ const handleVerify = async () => {
     }
 };
 
-// Show verification screen if client trust is needed
-if (signIn.status === 'needs_client_trust') {
+// Show verification screen if Clerk requires second-factor verification
+if (signIn.status === 'needs_second_factor' || signIn.status === 'needs_client_trust') {
     return (
         <SafeAreaView className="auth-safe-area">
             <KeyboardAvoidingView
@@ -297,7 +317,7 @@ return (
 
                     {/* Sign-Up Link */}
                     <View className="auth-link-row">
-                        <Text className="auth-link-copy">Don&apo;t have an account?</Text>
+                        <Text className="auth-link-copy">Don&apos;t have an account?</Text>
                         <Link href="/(auth)/sign-up" asChild>
                             <Pressable>
                                 <Text className="auth-link">Create Account</Text>
