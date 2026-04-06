@@ -1,4 +1,4 @@
-import { HOME_SUBSCRIPTIONS } from "@/constants/data";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { formatCurrency, formatStatusLabel, formatSubscriptionDateTime } from "@/lib/utils";
 import dayjs from "dayjs";
 import { styled } from "nativewind";
@@ -9,8 +9,10 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 const SafeAreaView = styled(RNSafeAreaView);
 
 export default function Insights() {
+  const { subscriptions } = useSubscriptionStore();
+
   const insights = useMemo(() => {
-    const activeSubscriptions = HOME_SUBSCRIPTIONS.filter(
+    const activeSubscriptions = subscriptions.filter(
       (subscription) => subscription.status === "active",
     );
 
@@ -30,19 +32,19 @@ export default function Insights() {
       return total + subscription.price * 12;
     }, 0);
 
-    const categoryTotals = HOME_SUBSCRIPTIONS.reduce<Record<string, number>>((acc, subscription) => {
+    const categoryTotals = subscriptions.reduce<Record<string, number>>((acc, subscription) => {
       const category = subscription.category || "Other";
       acc[category] = (acc[category] || 0) + subscription.price;
       return acc;
     }, {});
 
-    const statusTotals = HOME_SUBSCRIPTIONS.reduce<Record<string, number>>((acc, subscription) => {
+    const statusTotals = subscriptions.reduce<Record<string, number>>((acc, subscription) => {
       const status = subscription.status || "unknown";
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     }, {});
 
-    const upcomingRenewals = [...HOME_SUBSCRIPTIONS]
+    const upcomingRenewals = [...subscriptions]
       .filter((subscription) => !!subscription.renewalDate)
       .sort((a, b) => dayjs(a.renewalDate).valueOf() - dayjs(b.renewalDate).valueOf())
       .slice(0, 3);
@@ -53,13 +55,13 @@ export default function Insights() {
       monthlySpend,
       yearlySpend,
       activeCount: activeSubscriptions.length,
-      totalCount: HOME_SUBSCRIPTIONS.length,
+      totalCount: subscriptions.length,
       categoryTotals,
       statusTotals,
       upcomingRenewals,
       topCategory,
     };
-  }, []);
+  }, [subscriptions]);
 
   return (
     <SafeAreaView className="flex-1 bg-background p-5">

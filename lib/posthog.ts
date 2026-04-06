@@ -1,10 +1,11 @@
-import PostHog from 'posthog-react-native'
 import Constants from 'expo-constants'
+import PostHog from 'posthog-react-native'
 
 // Configuration loaded from app.config.js extras via expo-constants
 // Environment variables are read at build time in app.config.js
 const apiKey = Constants.expoConfig?.extra?.posthogProjectToken as string | undefined
 const host = Constants.expoConfig?.extra?.posthogHost as string | undefined
+const posthogDebug = Constants.expoConfig?.extra?.posthogDebug === true
 const isPostHogConfigured = !!(apiKey && apiKey !== 'phc_your_project_token_here' && host)
 
 if (!isPostHogConfigured) {
@@ -19,7 +20,6 @@ export const posthog = new PostHog(apiKey || 'placeholder_key', {
   ...(host ? { host } : {}),
   disabled: !isPostHogConfigured,
   captureAppLifecycleEvents: true,
-  debug: __DEV__,
   flushAt: 20,
   flushInterval: 10000,
   maxBatchSize: 100,
@@ -31,3 +31,7 @@ export const posthog = new PostHog(apiKey || 'placeholder_key', {
   fetchRetryCount: 3,
   fetchRetryDelay: 3000,
 })
+
+if (__DEV__ && posthogDebug) {
+  posthog.debug()
+}
