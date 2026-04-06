@@ -32,7 +32,7 @@ export default function Insights() {
       return total + subscription.price * 12;
     }, 0);
 
-    const categoryTotals = subscriptions.reduce<Record<string, number>>((acc, subscription) => {
+    const categoryTotals = activeSubscriptions.reduce<Record<string, number>>((acc, subscription) => {
       const category = subscription.category || "Other";
       acc[category] = (acc[category] || 0) + subscription.price;
       return acc;
@@ -45,7 +45,7 @@ export default function Insights() {
     }, {});
 
     const upcomingRenewals = [...subscriptions]
-      .filter((subscription) => !!subscription.renewalDate)
+      .filter((subscription) => subscription.status === "active" && !!subscription.renewalDate && dayjs(subscription.renewalDate).isAfter(dayjs()))
       .sort((a, b) => dayjs(a.renewalDate).valueOf() - dayjs(b.renewalDate).valueOf())
       .slice(0, 3);
 

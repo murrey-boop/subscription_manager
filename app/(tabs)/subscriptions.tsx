@@ -43,8 +43,21 @@ export default function Subscriptions() {
   };
 
   const handleToggleSubscriptionStatus = (subscription: Subscription) => {
-    const nextStatus = subscription.status === "active" ? "paused" : "active";
-    setSubscriptionStatus(subscription.id, nextStatus);
+    // Only toggle between "active" and "paused" statuses
+    switch (subscription.status) {
+      case "active":
+        setSubscriptionStatus(subscription.id, "paused");
+        break;
+      case "paused":
+        setSubscriptionStatus(subscription.id, "active");
+        break;
+      // Explicitly handle other statuses (cancelled, expired, etc.) - no-op
+      case "cancelled":
+      case "expired":
+      default:
+        // Do not allow toggling for other statuses
+        break;
+    }
   };
 
   return (

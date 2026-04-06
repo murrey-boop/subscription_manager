@@ -12,14 +12,37 @@ interface SubscriptionStore {
 
 const subscriptionStorage: StateStorage = {
   getItem: async (name) => {
-    const value = await SecureStore.getItemAsync(name)
-    return value ?? null
+    try {
+      const value = await SecureStore.getItemAsync(name)
+      return value ?? null
+    } catch (error) {
+      console.error(`[SecureStore] Failed to get item "${name}"`, error)
+      return null
+    }
   },
   setItem: async (name, value) => {
-    await SecureStore.setItemAsync(name, value)
+    try {
+      const byteLength = new TextEncoder().encode(value).length
+      const MAX_BYTES = 2000
+      
+      if (byteLength > MAX_BYTES) {
+        console.error(
+          `[SecureStore] Value for key "${name}" exceeds ${MAX_BYTES} bytes (${byteLength} bytes). Skipping write.`,
+        )
+        return
+      }
+      
+      await SecureStore.setItemAsync(name, value)
+    } catch (error) {
+      console.error(`[SecureStore] Failed to set item "${name}"`, error)
+    }
   },
   removeItem: async (name) => {
-    await SecureStore.deleteItemAsync(name)
+    try {
+      await SecureStore.deleteItemAsync(name)
+    } catch (error) {
+      console.error(`[SecureStore] Failed to remove item "${name}"`, error)
+    }
   },
 }
 
