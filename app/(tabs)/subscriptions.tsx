@@ -1,5 +1,5 @@
 import SubscriptionCard from "@/components/SubscriptionCard";
-import { HOME_SUBSCRIPTIONS } from "@/constants/data";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { styled } from "nativewind";
 import { useMemo, useState } from "react";
 import { FlatList, Pressable, Text, TextInput, View } from "react-native";
@@ -10,15 +10,16 @@ const SafeAreaView = styled(RNSafeAreaView);
 export default function Subscriptions() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
+  const { subscriptions, setSubscriptionStatus } = useSubscriptionStore();
 
   const filteredSubscriptions = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
     if (!normalizedQuery) {
-      return HOME_SUBSCRIPTIONS;
+      return subscriptions;
     }
 
-    return HOME_SUBSCRIPTIONS.filter((subscription) => {
+    return subscriptions.filter((subscription) => {
       const searchableText = [
         subscription.name,
         subscription.plan,
@@ -33,12 +34,17 @@ export default function Subscriptions() {
 
       return searchableText.includes(normalizedQuery);
     });
-  }, [searchQuery]);
+  }, [searchQuery, subscriptions]);
 
   const handleSubscriptionPress = (subscriptionId: string) => {
     setExpandedSubscriptionId((currentId) =>
       currentId === subscriptionId ? null : subscriptionId,
     );
+  };
+
+  const handleToggleSubscriptionStatus = (subscription: Subscription) => {
+    const nextStatus = subscription.status === "active" ? "paused" : "active";
+    setSubscriptionStatus(subscription.id, nextStatus);
   };
 
   return (
@@ -84,6 +90,7 @@ export default function Subscriptions() {
             {...item}
             expanded={expandedSubscriptionId === item.id}
             onPress={() => handleSubscriptionPress(item.id)}
+            onCancelPress={() => handleToggleSubscriptionStatus(item)}
           />
         )}
         ItemSeparatorComponent={() => <View className="h-4" />}

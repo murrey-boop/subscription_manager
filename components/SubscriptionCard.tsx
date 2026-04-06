@@ -1,10 +1,11 @@
 import {View, Text, Image, Pressable} from 'react-native'
 import React from 'react'
 import {formatCurrency, formatStatusLabel, formatSubscriptionDateTime} from "@/lib/utils";
-// eslint-disable-next-line import/no-named-as-default
-import clsx from "clsx";
+import { clsx } from "clsx";
 
-const SubscriptionCard = ({ name, price, currency, icon, billing, color, category, plan, renewalDate, expanded, onPress, paymentMethod, startDate, status}: SubscriptionCardProps) => {
+const SubscriptionCard = ({ name, price, currency, icon, billing, color, category, plan, renewalDate, expanded, onPress, paymentMethod, startDate, status, onCancelPress, isCancelling}: SubscriptionCardProps) => {
+    const isActive = status === 'active';
+
     return (
         <Pressable onPress={onPress} className={clsx('sub-card', expanded ? 'sub-card-expanded' : 'bg-card')} style={!expanded && color ? { backgroundColor: color } : undefined}>
             <View className="sub-head">
@@ -27,7 +28,7 @@ const SubscriptionCard = ({ name, price, currency, icon, billing, color, categor
             </View>
 
             {expanded && (
-                <View className="sub-bdy">
+                <View className="sub-body">
                     <View className="sub-details">
                         <View className="sub-row">
                             <View className="sub-row-copy">
@@ -59,6 +60,22 @@ const SubscriptionCard = ({ name, price, currency, icon, billing, color, categor
                                 <Text className="sub-value" numberOfLines={1} ellipsizeMode="tail">{status ? formatStatusLabel(status) : 'Not provided'}</Text>
                             </View>
                         </View>
+
+                        {onCancelPress && (
+                            <Pressable
+                                onPress={onCancelPress}
+                                className={clsx(
+                                    'sub-cancel',
+                                    isActive ? 'bg-destructive' : 'bg-success',
+                                    isCancelling && 'sub-cancel-disabled',
+                                )}
+                                disabled={isCancelling}
+                            >
+                                <Text className="sub-cancel-text">
+                                    {isActive ? 'Deactivate Subscription' : 'Activate Subscription'}
+                                </Text>
+                            </Pressable>
+                        )}
                     </View>
                 </View>
             )}
