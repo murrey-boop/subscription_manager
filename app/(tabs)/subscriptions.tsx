@@ -1,9 +1,9 @@
+import SubscriptionCard from "@/components/SubscriptionCard";
+import { HOME_SUBSCRIPTIONS } from "@/constants/data";
+import { styled } from "nativewind";
 import { useMemo, useState } from "react";
 import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import { styled } from "nativewind";
-import { HOME_SUBSCRIPTIONS } from "@/constants/data";
-import SubscriptionCard from "@/components/SubscriptionCard";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
